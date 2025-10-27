@@ -1,0 +1,247 @@
+﻿/*
+ * Creado por SharpDevelop.
+ * Usuario: Jorge
+ * Fecha: 26/10/2025
+ * Hora: 21:36
+ * 
+ * Para cambiar esta plantilla use Herramientas | Opciones | Codificación | Editar Encabezados Estándar
+ */
+using System;
+using System.Collections.Generic;
+
+namespace Banco
+{
+	class Program
+	{
+		public static void Main(string[] args)
+		{
+			Banco banco = new Banco("Banco");
+        int opcion;
+
+        do
+        {
+            Console.WriteLine();
+            Console.WriteLine("------ MENÚ BANCO ------");
+            Console.WriteLine("1. Agregar cuenta");
+            Console.WriteLine("2. Eliminar cuenta");
+            Console.WriteLine("3. Listar clientes con más de una cuenta");
+            Console.WriteLine("4. Realizar extracción");
+            Console.WriteLine("5. Depositar dinero");
+            Console.WriteLine("6. Transferir dinero");
+            Console.WriteLine("7. Listar cuentas");
+            Console.WriteLine("8. Listar clientes");
+            Console.WriteLine("0. Salir");
+            Console.WriteLine();
+            Console.Write("Opción: ");
+            opcion = int.Parse(Console.ReadLine());
+            Console.WriteLine();
+
+            switch (opcion)//utilizamos switch ya que nos permite facilitar el menu de opciones
+            {
+            	case 1:
+                    Console.Write("DNI del cliente: ");
+                    int dni = int.Parse(Console.ReadLine());
+
+                    // Busca al cliente (cambiamos esto, antes lo teniamos como metodo de banco, preguntar)
+
+                    Cliente cliente = banco.TodosLosClientes().Find(c => c.dni == dni);
+
+                    if (cliente == null)
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine("Usted es un cliente nuevo, debe ingresar los datos:");
+                        Console.WriteLine();
+                        Console.Write("Nombre: ");
+                        string nombre = Console.ReadLine();
+                        Console.Write("Apellido: ");
+                        string apellido = Console.ReadLine();
+                        Console.Write("Dirección: ");
+                        string direccion = Console.ReadLine();
+                        Console.Write("Teléfono: ");
+                        int telefono = int.Parse(Console.ReadLine());
+                        Console.Write("Mail: ");
+                        string mail = Console.ReadLine();
+
+                        cliente = new Cliente(nombre, apellido, dni, direccion, telefono, mail);
+                        banco.AgregarCliente(cliente);
+                        //Esto agrega al nuevo cliente en la lista
+                    }
+
+                    Console.Write("Saldo inicial: ");
+                    double saldo = double.Parse(Console.ReadLine());
+
+                    // Genera numero de cuenta (cambiamos esto, antes lo teniamos como metodo de banco, preguntar)
+
+                    int nroCuenta = banco.CantidadCuentas() > 0 ?
+                        banco.TodasLasCuentas().Max(c => c.numero) + 1 : 1;
+
+                    Cuenta nueva = new Cuenta(nroCuenta, cliente, saldo);
+                    banco.AgregarCuenta(nueva);
+
+                    Console.WriteLine();
+                    Console.WriteLine("Cuenta creada exitosamente. Nº de cuenta:"+nroCuenta);
+                    break;
+                    
+            	case 2:
+                    Console.Write("Número de cuenta: ");
+                    int numero = int.Parse(Console.ReadLine());
+
+                    // Busca la cuenta (cambiamos esto, antes lo teniamos en metodo como banco, preguntar)
+
+                    Cuenta cuenta = banco.TodasLasCuentas().Find(c => c.numero == numero);
+
+                    if (cuenta != null)
+                    {
+                        banco.EliminarCuenta(cuenta);
+
+                        // Tiene mas de una cuenta (cambiamos esto, antes lo teniamos como metodo de banco, preguntar)
+
+                        bool tieneMasCuentas = banco.TodasLasCuentas()
+                            .Count(c => c.titular.dni == cuenta.titular.dni) > 0;
+
+                        if (!tieneMasCuentas)
+                        {
+                            banco.EliminarCliente(cuenta.titular);
+                            Console.WriteLine("Cliente eliminado (ya no tenía más cuentas).");
+                        }
+
+                        Console.WriteLine("Cuenta eliminada correctamente.");
+                    }
+                    else
+                        Console.WriteLine("Cuenta no encontrada.");
+                    break;
+	
+            		case 3:
+
+                    // Obtiene clientes con mas de una cuenta (cambiamos esto, antes lo teniamos como metodo de banco, preguntar)
+
+                    var clientesRepetidos = banco.TodosLosClientes()
+                        .Where(c => banco.TodasLasCuentas()
+                        .Count(cta => cta.titular.dni == c.dni) > 1)
+                        .ToList();
+
+                    if (clientesRepetidos.Count == 0)
+                        Console.WriteLine("No hay clientes con más de una cuenta.");
+                    else
+                    {
+                        foreach (var cli in clientesRepetidos)//Hace un reccorido en la lista 
+                        {
+                            Console.WriteLine("Cliente:" +cli.apellido+"," +cli.nombre+ "- DNI:" +cli.dni);
+                            foreach (var cta in banco.TodasLasCuentas()
+                                .Where(c => c.titular.dni == cli.dni))
+                            {
+                                Console.WriteLine("  Cuenta Nº" +cta.numero - "Saldo:"+cta.saldo);
+                            }
+                        }
+                    }
+                    break;
+                    
+                   case 4:
+                    Console.Write("Número de cuenta: ");
+                    int nroExtraccion = int.Parse(Console.ReadLine());
+
+                    // Busca Cuenta (cambiamos esto, antes lo teniamos como metodo de banco, preguntar)
+
+                    Cuenta extraerDe = banco.TodasLasCuentas().Find(c => c.numero == nroExtraccion);
+
+                    if (extraerDe == null)
+                    {
+                        Console.WriteLine("Cuenta no encontrada.");
+                        break;
+                    }
+
+                    Console.Write("Monto a extraer: ");
+                    double montoExt = double.Parse(Console.ReadLine());
+
+                    try//Codigo que puede generar una excepcion
+                    {
+                        extraerDe.Extraer(montoExt);
+                        Console.WriteLine("Nuevo saldo: "+extraerDe.saldo);
+                    }
+                    catch (MontoinsuficienteExcepcion)//Sirve para atrapar y manejar los errores que pueden ocurrir
+                    {
+                        Console.WriteLine("Saldo insuficiente.");
+                    }
+                    break;
+
+            	case 5:
+                    Console.Write("Número de cuenta: ");
+                    int nroDep = int.Parse(Console.ReadLine());
+
+                    // Busca Cuenta (cambiamos esto, antes lo teniamos como metodo de banco, preguntar)
+
+                    Cuenta depositarEn = banco.TodasLasCuentas().Find(c => c.numero == nroDep);
+
+                    if (depositarEn == null)
+                    {
+                        Console.WriteLine("Cuenta no encontrada.");
+                        break;
+                    }
+
+                    Console.Write("Monto a depositar: ");
+                    double montoDep = double.Parse(Console.ReadLine());
+                    depositarEn.Depositar(montoDep);
+
+                    Console.WriteLine("Nuevo saldo:" +depositarEn.saldo);
+                    break;	
+                    
+                    case 6:
+                    Console.Write("Número de cuenta origen: ");
+                    int nroOrigen = int.Parse(Console.ReadLine());
+                    Console.Write("Número de cuenta destino: ");
+                    int nroDestino = int.Parse(Console.ReadLine());
+                    Console.Write("Monto: ");
+                    double monto = double.Parse(Console.ReadLine());
+
+                    // Transferir ahora se hace en el main (cambiamos esto, antes lo teniamos como metodo de banco, preguntar)
+
+                    Cuenta origen = banco.TodasLasCuentas().Find(c => c.numero == nroOrigen);
+                    Cuenta destino = banco.TodasLasCuentas().Find(c => c.numero == nroDestino);
+
+                    if (origen == null || destino == null)
+                    {
+                        Console.WriteLine("Error: una de las cuentas no existe.");
+                        break;
+                    }
+
+                    try
+                    {
+                        origen.Extraer(monto);
+                        destino.Depositar(monto);
+                        Console.WriteLine("Transferencia exitosa.");
+                    }
+                    catch (MontoinsuficienteExcepcion)
+                    {
+                        Console.WriteLine("Saldo insuficiente en la cuenta origen.");
+                    }
+                    break;
+                   case 7:
+                    foreach (var cta in banco.TodasLasCuentas())
+                        Console.WriteLine("Cuenta Nº "+cta.numero+" |" +cta.titular.apellido+", "+cta.titular.nombre," | DNI:" +cta.titular.dni,"| Saldo:" +cta.saldo);
+                    break;
+                     case 8:
+                    foreach (var cli in banco.TodosLosClientes())
+                    	Console.WriteLine(cli.nombre+cli.apellido," - DNI:" +cli.dni," - Tel:"+cli.telefono," - Mail:" +cli.mail);
+                    break;
+                    
+                   default:
+                    Console.WriteLine("opcion no valida");
+                    break;
+                    
+              
+            }
+
+        } while (opcion != 0);
+    
+            		
+            		
+           
+            	
+			
+			// TODO: Implement Functionality Here
+			
+			Console.Write("Press any key to continue . . . ");
+			Console.ReadKey(true);
+		    }
+		}
+	}
