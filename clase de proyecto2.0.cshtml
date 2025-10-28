@@ -1,0 +1,189 @@
+﻿/*
+ * Creado por SharpDevelop.
+ * Usuario: Jorge
+ * Fecha: 26/10/2025
+ * Hora: 21:37
+ * 
+ * Para cambiar esta plantilla use Herramientas | Opciones | Codificación | Editar Encabezados Estándar
+ */
+using System;
+using System.Collections.Generic;
+
+namespace Banco
+{
+	/// <summary>
+	/// Description of Banco.
+	/// </summary>
+	public class Banco
+	//Atributo
+	private string nombre;
+	//propiedad
+	public string Nombre
+	{
+		get{ return nombre;}
+		set{ nombre =value;}
+		
+	}
+	
+    public List<Cliente> clientes  { get; private set; }
+    public List<Cuenta> cuentas { get; private set; }
+		
+		public Banco(string nombre)
+		{
+		Nombre = nombre;
+        clientes = new List<Cliente>();
+        cuentas = new List<Cuenta>();
+		}
+		//Metodos simples para la clase cliente
+	public void AgregarCliente(Cliente c) 
+    { 
+        clientes.Add(c); //ADD agregra un elemento a la lista
+    }
+    public void EliminarCliente(Cliente c)
+    {
+        clientes.Removea(c);//Remove permite eleminar un elemento de la lista segun la posicion
+    }
+
+    public int CantidadClientes() 
+    { 
+        return clientes.Count; //Propiedad que dice cuantos elementos hay en la lista
+    }
+    public Cliente VerCliente(int i) 
+    { 
+        return clientes[i]; 
+    }
+    public List<Cliente> TodosLosClientes() 
+    { 
+        return clientes; 
+    }	
+	//Metodos simples para la clase cuenta
+	  public void AgregarCuenta(Cuenta c) 
+    { 
+        cuentas.Add(c); 
+    }
+    public void EliminarCuenta(Cuenta c) 
+    { 
+        cuentas.Remove(c); 
+    }
+    public int CantidadCuentas() 
+    { 
+        return cuentas.Count; 
+    }
+    public Cuenta VerCuenta(int i) 
+    { 
+        return cuentas[i]; 
+    }
+    public List<Cuenta> TodasLasCuentas() 
+    { 
+        return cuentas; 
+    }
+
+	}
+	public class Cuenta
+     {
+    private int numero;
+     //propiedad
+   public string Numero
+    {
+	get{ return numero;}
+	set{ numero =value;}
+     }
+    private Cliente titular;
+    //propiedad
+    {
+    	get{ return titular;}
+		set{ titular =value;}
+    }
+    //Atributo
+    private double saldo;
+    //propiedad
+    {
+    get{ return saldo;}
+	set{ saldo =value;}
+    }
+
+    public Cuenta(int numero, Cliente titular, double saldo)
+    {
+       Numero = numero;
+       Titular = titular;
+       Saldo = saldo;
+    }
+
+    public void Depositar(double monto)
+    {
+        if (monto <= 0)
+            throw new Exception("El monto debe ser mayor que 0");
+        //El throw sirve para lanzar la excepcion
+        saldo += monto;
+    }
+
+    public void Extraer(double monto)
+    {
+        if (monto > saldo)
+            throw new MontoinsuficienteExcepcion();
+        saldo -= monto;
+    }
+}
+	public class Cliente
+{
+	//Atributos definidos
+    private string nombre;
+    Public string Nombre
+    {
+    	get{ return nombre;}
+		set{ nombre =value;}	
+    }
+    private string apellido;
+    public string Apellido
+    {
+    	get{ return apellido;}
+		set{ apellido =value;}
+    }
+    private int dni;
+    public int Dni
+    {
+    	get{ return dni;}
+		set{ dni =value;}
+    }
+    private string direccion;
+    public string Direccion;
+    {
+    	get{ return direccion;}
+		set{ direccion =value;}
+    }
+   private int telefono;
+   public int Telefono
+   {
+   	get{ return telefono;}
+	set{ telefono =value;}
+   }
+    private string mail;
+    {
+    	get{ return mail;}
+		set{ mail =value;}
+    }
+
+    //Constructor
+    public Cliente(string nombre, string apellido, int dni, string direccion, int telefono, string mail)
+    {
+        Nombre = nombre;
+        Apellido = apellido;
+        Dni = dni;
+        Direccion = direccion;
+        Telefono = telefono;
+        Mail = mail;
+    }
+
+    public override string ToString()//El override sirve para cambiar el comportamieno de un metodo heredado
+    {
+    	return "Nombre y Apellido:"+nombre+","+ apellido"DNI:" + dni;
+    }
+}
+	public class MontoinsuficienteExcepcion : Exception 
+{
+		//Cuando creamos una excepcion, estamos utilizando herencia,ya que definimos una nueva clase que herada
+		//de la superclase excepcion
+}
+
+	
+}
